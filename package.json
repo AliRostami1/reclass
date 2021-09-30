@@ -1,0 +1,21 @@
+{
+	"name": "reclass",
+	"version": "0.1.0",
+	"description": "script to record my online classes on daan",
+	"main": "index.ts",
+	"repository": "https://github.com/AliRostami1/reclass",
+	"author": "Ali Rostami <ali.rostami@live.com>",
+	"license": "MIT",
+	"private": true,
+	"packageManager": "yarn@3.0.2",
+	"scripts": {
+		"start": "tsc && node dist/index.js"
+	},
+	"devDependencies": {
+		"typescript": "^4.4.3"
+	},
+	"dependencies": {
+		"puppeteer": "^10.4.0",
+		"puppeteer-screen-recorder": "^2.0.2"
+	}
+}
