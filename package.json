@@ -15,7 +15,9 @@
 		"typescript": "^4.4.3"
 	},
 	"dependencies": {
+		"@types/node": "^16.10.2",
 		"puppeteer": "^10.4.0",
-		"puppeteer-screen-recorder": "^2.0.2"
+		"puppeteer-screen-recorder": "^2.0.2",
+		"puppeteer-stream": "^2.0.6"
 	}
 }
