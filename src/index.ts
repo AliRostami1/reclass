@@ -1,7 +1,7 @@
 import { launch, getStream } from "puppeteer-stream";
 import fs from "fs";
 
-const file = fs.createWriteStream("/mnt/c/Users/AliRs/Desktop/test.mp4");
+const file = fs.createWriteStream("./out/video.mp4");
 
 async function test() {
 	const browser = await launch({
@@ -9,6 +9,12 @@ async function test() {
 			width: 1920,
 			height: 1080,
 		},
+		headless: false,
+		args: [
+			`--disable-extensions-except=${StayFocusd}`,
+			`--load-extension=${StayFocusd}`,
+			"--enable-automation",
+		],
 	});
 
 	const page = await browser.newPage();
