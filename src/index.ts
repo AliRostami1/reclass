@@ -12,16 +12,53 @@ async function test() {
 	});
 
 	const page = await browser.newPage();
-	await page.goto(
-		"http://mashhad.daan.ir/login-identification-form#login-identification-form"
-	);
-	await page.waitForSelector("input#identificationNumber");
 
-	await page.type("input#identificationNumber", "11139802563");
-	await page.type("input#password", "12AlI1234");
-	await page.click("button.btn.btn-primary");
-	await page.waitForSelector("div.tileHolder.meeting.student");
+	let loggedIn = false;
+	while (!loggedIn) {
+		try {
+			await page.goto(
+				"http://mashhad.daan.ir/login-identification-form#login-identification-form"
+			);
+
+			const usernameInput = await page.waitForSelector(
+				"input#identificationNumber"
+			);
+			if (usernameInput) {
+				await usernameInput.type("11139802563", { delay: 100 });
+			} else {
+				throw "usernameInput doesn't exist";
+			}
+
+			const passInput = await page.waitForSelector("input#password");
+			if (passInput) {
+				await passInput.type("12AlI1234", { delay: 100 });
+			} else {
+				throw "passInput doesn't exist";
+			}
+
+			const btn = await page.waitForSelector("button.btn.btn-primary");
+			if (btn) {
+				btn.click();
+			} else {
+				throw "btn doesn't exist";
+			}
+
+			const visible = await page.waitForSelector(
+				"div.tileHolder.meeting.student",
+				{
+					timeout: 10000,
+				}
+			);
+			if (visible) {
+				loggedIn = true;
+			}
+		} catch {
+			continue;
+		}
+	}
+
 	await page.goto("http://mashhad.daan.ir/session-list");
+
 	const stream = await getStream(page, { audio: true, video: true });
 
 	console.log("recording");
