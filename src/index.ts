@@ -1,7 +1,7 @@
 import { launch, getStream } from "puppeteer-stream";
-import fs from "fs";
+import { createWriteStream } from "fs";
 
-const file = fs.createWriteStream("./out/video.mp4");
+const file = createWriteStream("./out/video.mp4");
 // const logFile = fs.createWriteStream("./out/log.txt");
 interface Klass {
 	[key: string]: string | boolean;
