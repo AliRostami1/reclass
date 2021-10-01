@@ -2,6 +2,19 @@ import { launch, getStream } from "puppeteer-stream";
 import fs from "fs";
 
 const file = fs.createWriteStream("./out/video.mp4");
+// const logFile = fs.createWriteStream("./out/log.txt");
+interface Klass {
+	[key: string]: string | boolean;
+	name: string;
+	time: string;
+	biweekly: boolean;
+}
+
+const exampleklass: Klass = {
+	name: "آزمایشگاه سیستم‌های عامل",
+	time: "18:00",
+	biweekly: false,
+};
 
 async function test() {
 	const browser = await launch({
@@ -9,9 +22,11 @@ async function test() {
 			width: 1920,
 			height: 1080,
 		},
+		args: ["--start-maximized"],
 	});
 
-	const page = await browser.newPage();
+	const pages = await browser.pages();
+	const page = pages[0];
 
 	let loggedIn = false;
 	while (!loggedIn) {
@@ -53,11 +68,56 @@ async function test() {
 				loggedIn = true;
 			}
 		} catch {
+			console.log("login failed, trying again...");
 			continue;
 		}
 	}
 
-	await page.goto("http://mashhad.daan.ir/session-list");
+	console.log("logged in successfuly");
+
+	// await page.goto("http://mashhad.daan.ir/session-list");
+	await page.goto("http://mashhad.daan.ir/session-list?date=1400%2F07%2F10");
+
+	await page.waitForSelector("div.examBox");
+
+	const klassBtnHandle = await page.evaluateHandle((exampleklass) => {
+		const elements = document.querySelectorAll("div.examBox");
+		if (elements.length === 0) {
+			// there is no class
+			return;
+		}
+
+		let thisIsIt = -1;
+
+		elements.forEach((el, index) => {
+			const contentDiv = el.children[1];
+			const name = contentDiv.children[0].children[0].children[2].textContent;
+			const time = contentDiv.children[1].children[1].children[2].textContent;
+			if (name === exampleklass.name) {
+				if (exampleklass.biweekly) {
+					if (time !== exampleklass.time) {
+						thisIsIt = index;
+					}
+				} else {
+					if (time === exampleklass.time) {
+						thisIsIt = index;
+					}
+				}
+			}
+		});
+		if (thisIsIt !== -1) {
+			return elements[thisIsIt].querySelector("a.btn.examBtn");
+		} else {
+			throw "didn't find the class";
+		}
+	}, exampleklass);
+
+	const klassBtn = klassBtnHandle.asElement();
+	if (klassBtn) {
+		klassBtn.click();
+	} else {
+		throw "klass button doesn't exist";
+	}
 
 	const stream = await getStream(page, { audio: true, video: true });
 
