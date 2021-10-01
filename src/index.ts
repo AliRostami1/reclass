@@ -80,7 +80,7 @@ async function test() {
 
 	await page.waitForSelector("div.examBox");
 
-	const klassBtnHandle = await page.evaluateHandle((exampleklass) => {
+	const klassBtnHandle = await page.evaluateHandle((exampleklass: Klass) => {
 		const elements = document.querySelectorAll("div.examBox");
 		if (elements.length === 0) {
 			// there is no class
