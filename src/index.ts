@@ -10,8 +10,8 @@ interface Klass {
 }
 
 const exampleklass: Klass = {
-	name: "ریزپردازنده و زبان اسمبلی",
-	time: "10:00",
+	name: "انتقال داده ها",
+	time: "13:00",
 	biweekly: true,
 };
 
@@ -121,7 +121,7 @@ async function test() {
 			});
 			if (thisIsIt !== -1) {
 				return elements[thisIsIt].querySelector(
-					'button.btn.examBtn.resultBtn[type]="submit"'
+					'button.btn.examBtn.resultBtn[type="submit"]'
 				);
 			} else {
 				throw "didn't find the class";
