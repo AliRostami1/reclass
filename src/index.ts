@@ -1,7 +1,12 @@
 import { launch, getStream } from "puppeteer-stream";
+import { path as ffmpegPath } from "@ffmpeg-installer/ffmpeg";
+import { format } from "date-fns";
+import ffmpeg from "fluent-ffmpeg";
+
 import { createWriteStream } from "fs";
 
-// const logFile = fs.createWriteStream("./out/log.txt");
+ffmpeg.setFfmpegPath(ffmpegPath);
+
 interface Klass {
 	[key: string]: string | boolean;
 	name: string;
@@ -10,8 +15,8 @@ interface Klass {
 }
 
 const exampleklass: Klass = {
-	name: "انتقال داده ها",
-	time: "13:00",
+	name: "طراحی کامپیوتر سیستمهای دیجیتال",
+	time: "19:00",
 	biweekly: true,
 };
 
@@ -21,10 +26,7 @@ async function test() {
 			width: 0,
 			height: 0,
 		},
-		args: [
-			"--start-maximized",
-			// "--use-fake-ui-for-media-stream",
-		],
+		args: ["--start-maximized"],
 		executablePath: "C:/Program Files/Google/Chrome/Application/chrome.exe",
 	});
 	process.on("beforeExit", () => {
@@ -35,11 +37,8 @@ async function test() {
 		const pages = await browser.pages();
 		return pages.length !== 0;
 	};
-
 	const pages = await browser.pages();
 	const page = pages[0];
-
-	// await page.setViewport({ width: 0, height: 0 });
 
 	let loggedIn = false;
 	while (!loggedIn && (await isBrowserOpen())) {
@@ -123,8 +122,6 @@ async function test() {
 				return elements[thisIsIt].querySelector(
 					'button.btn.examBtn.resultBtn[type="submit"]'
 				);
-			} else {
-				throw "didn't find the class";
 			}
 		}, exampleklass);
 
@@ -137,7 +134,7 @@ async function test() {
 			continue;
 		}
 
-		await page.waitForTimeout(5000);
+		await page.waitForTimeout(10000);
 		const url = page.url();
 		const res = url.match(/class(\d)+\.daan\.ir/);
 		if (res) {
@@ -150,16 +147,35 @@ async function test() {
 		}
 	}
 
-	const file = createWriteStream("./out/video.mp4");
+	const basePath = "./out/";
+	const videoName = `${exampleklass.name}-${format(Date.now(), "yyyy-MM-dd")}`;
+	const plainVideoPath = `${basePath}${videoName}.mp4`;
+	const x265VideoPath = `${basePath}${videoName}-x265.mp4`;
+	const file = createWriteStream(plainVideoPath);
 	const stream = await getStream(page, { audio: true, video: true });
-	process.on("beforeExit", async () => {
+	const exitProcedure = async () => {
 		await stream.destroy();
 		console.log("stopped recording");
 		file.close();
 		console.log("file saved!");
-	});
+		ffmpeg(plainVideoPath)
+			.fps(24)
+			.format("mp4")
+			.videoCodec("libx265")
+			.addOption(["-crf 20", "-max_muxing_queue_size 512"])
+			.save(x265VideoPath)
+			.on("start", () => {
+				console.log(" ------- started  ------- ");
+			})
+			.on("stderr", (err) => {
+				console.error(err);
+			})
+			.on("end", () => {
+				console.log("  ------- finished  ------- ");
+				process.exit(0);
+			});
+	};
 	console.log("started recording");
-	stream.pipe(file);
 
 	const audioBtn = await page.waitForSelector(
 		'button.jumbo--Z12Rgj4.buttonWrapper--x8uow.audioBtn--1H6rCK[aria-label="تنها شنونده"]',
@@ -172,14 +188,14 @@ async function test() {
 	}
 
 	setTimeout(async () => {
-		process.exit(0);
-	}, 1000 * 60 * 60);
+		await exitProcedure();
+	}, 1000 * 60 * 90);
 
 	while (await isBrowserOpen()) {
 		await page.waitForTimeout(1000 * 60);
 		const endModal = await page.$("modal--MalHB");
 		if (endModal) {
-			process.exit(0);
+			await exitProcedure();
 		}
 	}
 }
