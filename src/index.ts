@@ -151,7 +151,7 @@ async function test() {
 	}
 
 	const file = createWriteStream("./out/video.mp4");
-	const stream = await getStream(page, { audio: true, video: true,"audioBitsPerSecond" });
+	const stream = await getStream(page, { audio: true, video: true });
 	process.on("beforeExit", async () => {
 		await stream.destroy();
 		console.log("stopped recording");
