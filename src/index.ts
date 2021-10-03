@@ -17,8 +17,12 @@ interface Klass {
 const exampleklass: Klass = {
 	name: "طراحی کامپیوتر سیستمهای دیجیتال",
 	time: "19:00",
-	biweekly: true,
+	biweekly: false,
 };
+
+function delay(ms: number) {
+	new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 async function test() {
 	const browser = await launch({
@@ -165,39 +169,52 @@ async function test() {
 			.addOption(["-crf 20", "-max_muxing_queue_size 512"])
 			.save(x265VideoPath)
 			.on("start", () => {
-				console.log(" ------- started  ------- ");
+				console.log(" ------- started compressing ------- ");
 			})
 			.on("stderr", (err) => {
 				console.error(err);
 			})
 			.on("end", () => {
-				console.log("  ------- finished  ------- ");
+				console.log("  ------- finished compressing ------- ");
 				process.exit(0);
 			});
 	};
 	console.log("started recording");
 
-	const audioBtn = await page.waitForSelector(
-		'button.jumbo--Z12Rgj4.buttonWrapper--x8uow.audioBtn--1H6rCK[aria-label="تنها شنونده"]',
-		{ timeout: 15000 }
-	);
-	if (audioBtn) {
-		audioBtn.click();
-	} else {
-		throw "audio button doesnt exist";
-	}
-
 	setTimeout(async () => {
+		console.log("reached limit");
 		await exitProcedure();
 	}, 1000 * 60 * 90);
 
-	while (await isBrowserOpen()) {
-		await page.waitForTimeout(1000 * 60);
-		const endModal = await page.$("modal--MalHB");
-		if (endModal) {
-			await exitProcedure();
+	(async () => {
+		while (await isBrowserOpen()) {
+			await page.waitForTimeout(1000 * 60);
+			const audioBtn = await page.$(
+				'button.jumbo--Z12Rgj4.buttonWrapper--x8uow.audioBtn--1H6rCK[aria-label="تنها شنونده"]'
+			);
+			if (audioBtn) {
+				audioBtn.click();
+			}
+			const endModal = await page.$("div.modal--MalHB");
+			if (endModal) {
+				console.log("encountered end of class");
+				await exitProcedure();
+			}
 		}
-	}
+	})();
+
+	await delay(1000 * 60 * 20);
+	await (async () => {
+		while (await isBrowserOpen()) {
+			const users = await page.$$("div.userListItem--Z1qtuLG");
+			if (users.length < 5) {
+				console.log("there are less than 5 people in the class");
+				await exitProcedure();
+			}
+		}
+		await delay(1000 * 60);
+	})();
+	// users: userListItem--Z1qtuLG
 }
 
 test();
