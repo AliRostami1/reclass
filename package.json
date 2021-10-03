@@ -9,7 +9,8 @@
 	"private": true,
 	"packageManager": "yarn@3.0.2",
 	"scripts": {
-		"start": "tsc && node dist/index.js"
+		"start": "tsc && node dist/index.js",
+		"exp": "tsc ** node dist/exp.js"
 	},
 	"devDependencies": {
 		"typescript": "^4.4.3"
@@ -17,7 +18,6 @@
 	"dependencies": {
 		"@types/node": "^16.10.2",
 		"puppeteer": "^10.4.0",
-		"puppeteer-screen-recorder": "^2.0.2",
 		"puppeteer-stream": "^2.0.6"
 	}
 }
