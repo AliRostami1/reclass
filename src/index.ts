@@ -10,7 +10,6 @@ const rl = createInterface({
 });
 
 import { createWriteStream } from "fs";
-import { count } from "console";
 
 ffmpeg.setFfmpegPath(ffmpegPath);
 
@@ -22,8 +21,8 @@ interface Klass {
 }
 
 const exampleklass: Klass = {
-	name: "s طراحی کامپایلر",
-	time: "10:00",
+	name: "طراحی کامپیوتر سیستمهای دیجیتال",
+	time: "16:00",
 	biweekly: false,
 };
 
@@ -171,12 +170,15 @@ async function test() {
 	const x265VideoPath = `${basePath}${videoName}-x265.mp4`;
 	const file = createWriteStream(plainVideoPath);
 	const stream = await getStream(page, { audio: true, video: true });
+	stream.pipe(file);
+	console.log("started recording");
+
 	const exitProcedure = async () => {
 		await stream.destroy();
 		console.log("stopped recording");
 		file.close();
 		console.log("file saved!");
-		await delay(1000 * 60);
+		await delay(1000 * 10);
 
 		ffmpeg(plainVideoPath)
 			.fps(24)
@@ -195,7 +197,6 @@ async function test() {
 				process.exit(0);
 			});
 	};
-	console.log("started recording");
 
 	rl.on("line", async (input) => {
 		if (input === "stop") {
