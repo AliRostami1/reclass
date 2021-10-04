@@ -2,8 +2,15 @@ import { launch, getStream } from "puppeteer-stream";
 import { path as ffmpegPath } from "@ffmpeg-installer/ffmpeg";
 import { format } from "date-fns";
 import ffmpeg from "fluent-ffmpeg";
+import { createInterface } from "readline";
+
+const rl = createInterface({
+	input: process.stdin,
+	output: process.stdout,
+});
 
 import { createWriteStream } from "fs";
+import { count } from "console";
 
 ffmpeg.setFfmpegPath(ffmpegPath);
 
@@ -15,13 +22,13 @@ interface Klass {
 }
 
 const exampleklass: Klass = {
-	name: "طراحی کامپیوتر سیستمهای دیجیتال",
-	time: "19:00",
+	name: "s طراحی کامپایلر",
+	time: "10:00",
 	biweekly: false,
 };
 
 function delay(ms: number) {
-	new Promise((resolve) => setTimeout(resolve, ms));
+	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function test() {
@@ -44,8 +51,7 @@ async function test() {
 	const pages = await browser.pages();
 	const page = pages[0];
 
-	let loggedIn = false;
-	while (!loggedIn && (await isBrowserOpen())) {
+	while (await isBrowserOpen()) {
 		try {
 			await page.goto(
 				"http://mashhad.daan.ir/login-identification-form#login-identification-form"
@@ -69,21 +75,21 @@ async function test() {
 
 			const btn = await page.waitForSelector("button.btn.btn-primary");
 			if (btn) {
-				btn.click();
+				await Promise.all([
+					btn.click(),
+					page.waitForNavigation({ waitUntil: "networkidle2" }),
+				]);
+				const url = await page.url();
+				if (url === "http://mashhad.daan.ir/class-dashboard") {
+					break;
+				} else {
+					throw "login failed";
+				}
 			} else {
 				throw "btn doesn't exist";
 			}
-
-			const visible = await page.waitForSelector(
-				"div.tileHolder.meeting.student",
-				{
-					timeout: 10000,
-				}
-			);
-			if (visible) {
-				loggedIn = true;
-			}
-		} catch {
+		} catch (e) {
+			console.error(e);
 			console.log("login failed, trying again...");
 			continue;
 		}
@@ -91,62 +97,70 @@ async function test() {
 	console.log("logged in successfuly");
 
 	while (await isBrowserOpen()) {
-		await page.goto("http://mashhad.daan.ir/session-list");
+		try {
+			await page.goto("http://mashhad.daan.ir/session-list");
 
-		await page.waitForSelector("div.examBox");
+			await page.waitForSelector("div.examBox");
 
-		const klassBtnHandle = await page.evaluateHandle((exampleklass: Klass) => {
-			const elements = document.querySelectorAll("div.examBox");
-			if (elements.length === 0) {
-				// there is no class
-				return;
-			}
-
-			let thisIsIt = -1;
-
-			elements.forEach((el, index) => {
-				const title = el.children[0].children[2].textContent;
-				const name =
-					el.children[1].children[0].children[0].children[2].textContent;
-				const time =
-					el.children[1].children[1].children[1].children[2].textContent;
-				if (name === exampleklass.name) {
-					if (exampleklass.biweekly) {
-						if (title !== name) {
-							thisIsIt = index;
-						}
-					} else {
-						if (time === exampleklass.time) {
-							thisIsIt = index;
-						}
+			const klassBtnHandle = await page.evaluateHandle(
+				(exampleklass: Klass) => {
+					const elements = document.querySelectorAll("div.examBox");
+					if (elements.length === 0) {
+						// there is no class
+						return;
 					}
-				}
-			});
-			if (thisIsIt !== -1) {
-				return elements[thisIsIt].querySelector(
-					'button.btn.examBtn.resultBtn[type="submit"]'
-				);
+
+					let thisIsIt = -1;
+
+					elements.forEach((el, index) => {
+						const title = el.children[0].children[2].textContent;
+						const name =
+							el.children[1].children[0].children[0].children[2].textContent;
+						const time =
+							el.children[1].children[1].children[1].children[2].textContent;
+						if (name === exampleklass.name) {
+							if (exampleklass.biweekly) {
+								if (title !== name) {
+									thisIsIt = index;
+								}
+							} else {
+								if (time === exampleklass.time) {
+									thisIsIt = index;
+								}
+							}
+						}
+					});
+					if (thisIsIt !== -1) {
+						return elements[thisIsIt].querySelector(
+							'button.btn.examBtn.resultBtn[type="submit"]'
+						);
+					}
+				},
+				exampleklass
+			);
+
+			const klassBtn = klassBtnHandle.asElement();
+
+			if (klassBtn) {
+				await Promise.all([
+					klassBtn.click(),
+					page.waitForNavigation({ waitUntil: "networkidle2" }),
+				]);
+			} else {
+				throw "klassBtn not found";
 			}
-		}, exampleklass);
-
-		const klassBtn = klassBtnHandle.asElement();
-		if (klassBtn) {
-			klassBtn.click();
-		} else {
-			console.log("failed finding the class, trying again after 2 minutes...");
-			await page.waitForTimeout(1000 * 60 * 2);
-			continue;
-		}
-
-		await page.waitForTimeout(10000);
-		const url = page.url();
-		const res = url.match(/class(\d)+\.daan\.ir/);
-		if (res) {
-			console.log("enterd class");
-			break;
-		} else {
-			console.log("failed entering class, trying again after one minute...");
-			await page.waitForTimeout(1000 * 60);
+			const url = page.url();
+			const res = url.match(/class(\d)+\.daan\.ir/);
+			if (res) {
+				console.log("enterd class");
+				break;
+			} else {
+				throw "failed entering the class";
+			}
+		} catch (e) {
+			console.error(e);
+			console.log("failed entering the class, trying again in 2 minutes...");
+			await delay(1000 * 60 * 2);
 			continue;
 		}
 	}
@@ -162,6 +176,8 @@ async function test() {
 		console.log("stopped recording");
 		file.close();
 		console.log("file saved!");
+		await delay(1000 * 60);
+
 		ffmpeg(plainVideoPath)
 			.fps(24)
 			.format("mp4")
@@ -181,6 +197,12 @@ async function test() {
 	};
 	console.log("started recording");
 
+	rl.on("line", async (input) => {
+		if (input === "stop") {
+			await exitProcedure();
+		}
+	});
+
 	setTimeout(async () => {
 		console.log("reached limit");
 		await exitProcedure();
@@ -188,33 +210,50 @@ async function test() {
 
 	(async () => {
 		while (await isBrowserOpen()) {
-			await page.waitForTimeout(1000 * 60);
-			const audioBtn = await page.$(
-				'button.jumbo--Z12Rgj4.buttonWrapper--x8uow.audioBtn--1H6rCK[aria-label="تنها شنونده"]'
-			);
-			if (audioBtn) {
-				audioBtn.click();
-			}
-			const endModal = await page.$("div.modal--MalHB");
-			if (endModal) {
-				console.log("encountered end of class");
-				await exitProcedure();
+			try {
+				const audioBtn = await page.$(
+					'button.jumbo--Z12Rgj4.buttonWrapper--x8uow.audioBtn--1H6rCK[aria-label="تنها شنونده"]'
+				);
+				if (audioBtn) {
+					audioBtn.click();
+				}
+				const endModal = await page.$("div.modal--MalHB");
+				if (endModal) {
+					console.log("encountered end of class");
+					await exitProcedure();
+				}
+				await delay(1000 * 60);
+			} catch (e) {
+				console.log(e);
+				await delay(1000 * 60);
+				continue;
 			}
 		}
 	})();
 
 	await delay(1000 * 60 * 20);
 	await (async () => {
+		let counter = 0;
 		while (await isBrowserOpen()) {
-			const users = await page.$$("div.userListItem--Z1qtuLG");
-			if (users.length < 5) {
-				console.log("there are less than 5 people in the class");
-				await exitProcedure();
+			try {
+				const users = await page.$$("div.userListItem--Z1qtuLG");
+				if (users.length < 5) {
+					console.log("there are less than 5 people in the class");
+					counter += 1;
+				} else {
+					counter = 0;
+				}
+				if (counter >= 2) {
+					await exitProcedure();
+				}
+				await delay(1000 * 60);
+			} catch (e) {
+				console.log(e);
+				await delay(1000 * 60);
+				continue;
 			}
 		}
-		await delay(1000 * 60);
 	})();
-	// users: userListItem--Z1qtuLG
 }
 
 test();
