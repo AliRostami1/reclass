@@ -173,7 +173,10 @@ async function test() {
 	}
 
 	const basePath = "./out/";
-	const videoName = `${exampleklass.name}-${format(Date.now(), "yyyy-MM-dd")}`;
+	const videoName = `${exampleklass.name}-${format(
+		Date.now(),
+		"yyyy-MM-dd_kk-mm-ss"
+	)}`;
 	const plainVideoPath = `${basePath}${videoName}.mp4`;
 	const x265VideoPath = `${basePath}${videoName}-x265.mp4`;
 	const file = createWriteStream(plainVideoPath);
