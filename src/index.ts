@@ -21,8 +21,8 @@ interface Klass {
 }
 
 const exampleklass: Klass = {
-	name: "طراحی کامپیوتر سیستمهای دیجیتال",
-	time: "16:00",
+	name: "تحلیل‌ و طراحی سیستم ها",
+	time: "19:00",
 	biweekly: false,
 };
 
@@ -72,6 +72,7 @@ async function test() {
 				throw "passInput doesn't exist";
 			}
 
+			await delay(1000);
 			const btn = await page.waitForSelector("button.btn.btn-primary");
 			if (btn) {
 				await Promise.all([
@@ -89,14 +90,22 @@ async function test() {
 			}
 		} catch (e) {
 			console.error(e);
-			console.log("login failed, trying again...");
+			console.log("trying again...");
 			continue;
 		}
 	}
 	console.log("logged in successfuly");
 
+	const isInClass = () => {
+		const url = page.url();
+		const res = url.match(/class(\d)+\.daan\.ir/);
+		return !!res;
+	};
 	while (await isBrowserOpen()) {
 		try {
+			if (isInClass()) {
+				break;
+			}
 			await page.goto("http://mashhad.daan.ir/session-list");
 
 			await page.waitForSelector("div.examBox");
@@ -148,9 +157,8 @@ async function test() {
 			} else {
 				throw "klassBtn not found";
 			}
-			const url = page.url();
-			const res = url.match(/class(\d)+\.daan\.ir/);
-			if (res) {
+
+			if (isInClass()) {
 				console.log("enterd class");
 				break;
 			} else {
@@ -232,8 +240,8 @@ async function test() {
 		}
 	})();
 
-	await delay(1000 * 60 * 20);
 	await (async () => {
+		await delay(1000 * 60 * 20);
 		let counter = 0;
 		while (await isBrowserOpen()) {
 			try {
