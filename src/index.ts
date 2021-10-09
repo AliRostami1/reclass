@@ -1,15 +1,16 @@
+#!/usr/bin/env node
+
 import { launch, getStream } from "puppeteer-stream";
 import { path as ffmpegPath } from "@ffmpeg-installer/ffmpeg";
 import { format } from "date-fns";
 import ffmpeg from "fluent-ffmpeg";
 import { createInterface } from "readline";
+import { createWriteStream } from "fs";
 
 const rl = createInterface({
 	input: process.stdin,
 	output: process.stdout,
 });
-
-import { createWriteStream } from "fs";
 
 ffmpeg.setFfmpegPath(ffmpegPath);
 
@@ -21,8 +22,8 @@ interface Klass {
 }
 
 const exampleklass: Klass = {
-	name: "تحلیل‌ و طراحی سیستم ها",
-	time: "19:00",
+	name: "آزمایشگاه سیستم‌های عامل",
+	time: "18:00",
 	biweekly: false,
 };
 
@@ -30,7 +31,7 @@ function delay(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function test() {
+async function main() {
 	const browser = await launch({
 		defaultViewport: {
 			width: 0,
@@ -39,16 +40,24 @@ async function test() {
 		args: ["--start-maximized"],
 		executablePath: "C:/Program Files/Google/Chrome/Application/chrome.exe",
 	});
-	process.on("beforeExit", () => {
-		browser.close();
-	});
 
 	const isBrowserOpen = async () => {
-		const pages = await browser.pages();
-		return pages.length !== 0;
+		try {
+			const pages = await browser.pages();
+			return pages.length !== 0;
+		} catch (error) {
+			return false;
+		}
 	};
 	const pages = await browser.pages();
 	const page = pages[0];
+
+	const session = await page.target().createCDPSession();
+	const { windowId } = await session.send("Browser.getWindowForTarget");
+	await session.send("Browser.setWindowBounds", {
+		windowId,
+		bounds: { windowState: "minimized" },
+	});
 
 	while (await isBrowserOpen()) {
 		try {
@@ -166,8 +175,8 @@ async function test() {
 			}
 		} catch (e) {
 			console.error(e);
-			console.log("failed entering the class, trying again in 2 minutes...");
-			await delay(1000 * 60 * 2);
+			console.log("trying again in a minute...");
+			await delay(1000 * 60);
 			continue;
 		}
 	}
@@ -185,28 +194,31 @@ async function test() {
 	console.log("started recording");
 
 	const exitProcedure = async () => {
-		await stream.destroy();
-		console.log("stopped recording");
-		file.close();
-		console.log("file saved!");
-		await delay(1000 * 10);
+		if (!stream.destroyed) {
+			await stream.destroy();
+			console.log("stopped recording");
+			file.close();
+			console.log("file saved!");
+			await browser.close();
+			await delay(1000 * 10);
 
-		ffmpeg(plainVideoPath)
-			.fps(24)
-			.format("mp4")
-			.videoCodec("libx265")
-			.addOption(["-crf 20", "-max_muxing_queue_size 512"])
-			.save(x265VideoPath)
-			.on("start", () => {
-				console.log(" ------- started compressing ------- ");
-			})
-			.on("stderr", (err) => {
-				console.error(err);
-			})
-			.on("end", () => {
-				console.log("  ------- finished compressing ------- ");
-				process.exit(0);
-			});
+			ffmpeg(plainVideoPath)
+				.fps(24)
+				.format("mp4")
+				.videoCodec("libx265")
+				.addOption(["-crf 20", "-max_muxing_queue_size 512"])
+				.save(x265VideoPath)
+				.on("start", () => {
+					console.log(" ------- started compressing ------- ");
+				})
+				.on("stderr", (err) => {
+					console.error(err);
+				})
+				.on("end", () => {
+					console.log("  ------- finished compressing ------- ");
+					process.exit(0);
+				});
+		}
 	};
 
 	rl.on("line", async (input) => {
@@ -268,4 +280,4 @@ async function test() {
 	})();
 }
 
-test();
+main();
