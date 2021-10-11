@@ -22,8 +22,8 @@ interface Klass {
 }
 
 const exampleklass: Klass = {
-	name: "آزمایشگاه سیستم‌های عامل",
-	time: "18:00",
+	name: "اصول طراحی کامپایلر",
+	time: "10:00",
 	biweekly: false,
 };
 
