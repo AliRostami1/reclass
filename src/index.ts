@@ -3,16 +3,14 @@
 import { launch, getStream } from "puppeteer-stream";
 import { path as ffmpegPath } from "@ffmpeg-installer/ffmpeg";
 import { format } from "date-fns";
-import ffmpeg from "fluent-ffmpeg";
 import { createInterface } from "readline";
 import { createWriteStream } from "fs";
+import { spawn } from "child_process";
 
 const rl = createInterface({
 	input: process.stdin,
 	output: process.stdout,
 });
-
-ffmpeg.setFfmpegPath(ffmpegPath);
 
 interface Klass {
 	[key: string]: string | boolean;
@@ -22,8 +20,8 @@ interface Klass {
 }
 
 const exampleklass: Klass = {
-	name: "اصول طراحی کامپایلر",
-	time: "10:00",
+	name: "طراحی کامپیوتر سیستمهای دیجیتال",
+	time: "16:00",
 	biweekly: false,
 };
 
@@ -187,11 +185,47 @@ async function main() {
 		"yyyy-MM-dd_kk-mm-ss"
 	)}`;
 	const plainVideoPath = `${basePath}${videoName}.mp4`;
-	const x265VideoPath = `${basePath}${videoName}-x265.mp4`;
 	const file = createWriteStream(plainVideoPath);
 	const stream = await getStream(page, { audio: true, video: true });
-	stream.pipe(file);
+	const ffmpeg = spawn(
+		ffmpegPath,
+		[
+			"-y",
+			"-i",
+			"-",
+			"-c:v",
+			"libx265",
+			"-crf",
+			"28",
+			"-r",
+			"24",
+			"-filter:v",
+			`"crop=in_w:in_h-155"`,
+			"-c:a",
+			"mp3",
+			"-f",
+			"mp4",
+			// "-max_muxing_queue_size",
+			// "512",
+			"out.mp4",
+			"-q:a",
+			"0",
+			"-map",
+			"a",
+			"-f",
+			"mp3",
+			// "-max_muxing_queue_size",
+			// "1024",
+			"-",
+		],
+		{ shell: true }
+	);
 	console.log("started recording");
+	const ffplay = spawn(`C:/Program Files/ffmpeg/bin/ffplay.exe`, ["-"]);
+
+	ffmpeg.stderr.pipe(process.stdout);
+	ffmpeg.stdout.pipe(ffplay.stdin);
+	stream.pipe(ffmpeg.stdin);
 
 	const exitProcedure = async () => {
 		if (!stream.destroyed) {
@@ -200,24 +234,6 @@ async function main() {
 			file.close();
 			console.log("file saved!");
 			await browser.close();
-			await delay(1000 * 10);
-
-			ffmpeg(plainVideoPath)
-				.fps(24)
-				.format("mp4")
-				.videoCodec("libx265")
-				.addOption(["-crf 20", "-max_muxing_queue_size 512"])
-				.save(x265VideoPath)
-				.on("start", () => {
-					console.log(" ------- started compressing ------- ");
-				})
-				.on("stderr", (err) => {
-					console.error(err);
-				})
-				.on("end", () => {
-					console.log("  ------- finished compressing ------- ");
-					process.exit(0);
-				});
 		}
 	};
 
