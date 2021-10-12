@@ -1,5 +1,4 @@
 import { Page, Browser } from "puppeteer-core";
-
 import { isBrowserOpen } from "./page";
 import { getEnv } from "./env";
 import { delay } from "./util";

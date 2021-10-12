@@ -1,25 +1,25 @@
 {
-	"name": "reclass",
-	"version": "0.1.0",
-	"description": "script to record my online classes on daan",
-	"main": "index.ts",
-	"repository": "https://github.com/AliRostami1/reclass",
-	"author": "Ali Rostami <ali.rostami@live.com>",
-	"license": "MIT",
-	"private": true,
-	"packageManager": "yarn@3.0.2",
-	"scripts": {
-		"start": "tsc && node dist/index.js",
-		"exp": "tsc && node dist/test.js"
-	},
-	"devDependencies": {
-		"@types/node": "^16.10.2",
-		"typescript": "^4.4.3"
-	},
-	"dependencies": {
-		"date-fns": "^2.24.0",
-		"dotenv": "^10.0.0",
-		"puppeteer-core": "^10.4.0",
-		"puppeteer-stream": "^2.0.6"
-	}
+  "name": "reclass",
+  "version": "0.1.0",
+  "description": "script to record my online classes on daan",
+  "main": "index.ts",
+  "repository": "https://github.com/AliRostami1/reclass",
+  "author": "Ali Rostami <ali.rostami@live.com>",
+  "license": "MIT",
+  "private": true,
+  "packageManager": "yarn@3.0.2",
+  "scripts": {
+    "start": "tsc && node dist/index.js",
+    "exp": "tsc && node dist/test.js"
+  },
+  "devDependencies": {
+    "@types/node": "^16.10.2",
+    "typescript": "^4.4.3"
+  },
+  "dependencies": {
+    "date-fns": "^2.24.0",
+    "dotenv": "^10.0.0",
+    "puppeteer-core": "^10.4.0",
+    "puppeteer-stream": "^2.0.6"
+  }
 }
