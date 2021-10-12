@@ -5,95 +5,6 @@ __metadata:
   version: 4
   cacheKey: 8
 
-"@ffmpeg-installer/darwin-arm64@npm:4.1.5":
-  version: 4.1.5
-  resolution: "@ffmpeg-installer/darwin-arm64@npm:4.1.5"
-  checksum: e196ac95e95ca98820492f3a8269dad15d91bbe28684e16aaf5e4817c19ef0efd6d2e67f75d62ecda2756351d0c1ad3f5f03222d39610ad9a9533658a6579041
-  languageName: node
-  linkType: hard
-
-"@ffmpeg-installer/darwin-x64@npm:4.1.0":
-  version: 4.1.0
-  resolution: "@ffmpeg-installer/darwin-x64@npm:4.1.0"
-  checksum: 2e25a3ed3d79d53d796101b0b4cdb5506a6c5983b49d9409238d6e4d3b66822213811453193ef3e2224cf6a767cfefcd2d45e978bab23c9b865ee54c416c88c8
-  languageName: node
-  linkType: hard
-
-"@ffmpeg-installer/ffmpeg@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@ffmpeg-installer/ffmpeg@npm:1.1.0"
-  dependencies:
-    "@ffmpeg-installer/darwin-arm64": 4.1.5
-    "@ffmpeg-installer/darwin-x64": 4.1.0
-    "@ffmpeg-installer/linux-arm": 4.1.3
-    "@ffmpeg-installer/linux-arm64": 4.1.4
-    "@ffmpeg-installer/linux-ia32": 4.1.0
-    "@ffmpeg-installer/linux-x64": 4.1.0
-    "@ffmpeg-installer/win32-ia32": 4.1.0
-    "@ffmpeg-installer/win32-x64": 4.1.0
-  dependenciesMeta:
-    "@ffmpeg-installer/darwin-arm64":
-      optional: true
-    "@ffmpeg-installer/darwin-x64":
-      optional: true
-    "@ffmpeg-installer/linux-arm":
-      optional: true
-    "@ffmpeg-installer/linux-arm64":
-      optional: true
-    "@ffmpeg-installer/linux-ia32":
-      optional: true
-    "@ffmpeg-installer/linux-x64":
-      optional: true
-    "@ffmpeg-installer/win32-ia32":
-      optional: true
-    "@ffmpeg-installer/win32-x64":
-      optional: true
-  checksum: 9725b2ae23a705204ac3f2f21ae796c06150d7f1c757583b664523a305be91bd8276859c25717a0d55cc4d2d6afde6d25acb5515050dc0d2d69bcf77c7c59aa4
-  languageName: node
-  linkType: hard
-
-"@ffmpeg-installer/linux-arm64@npm:4.1.4":
-  version: 4.1.4
-  resolution: "@ffmpeg-installer/linux-arm64@npm:4.1.4"
-  checksum: a0a37efd4263a851daa86000e910eaafee9f4992a6928375e799fc8ca0648f01cb7ebbe6c2b7b6231516e7f95affaff0442fa9d5d47b522b0a44328623241d27
-  languageName: node
-  linkType: hard
-
-"@ffmpeg-installer/linux-arm@npm:4.1.3":
-  version: 4.1.3
-  resolution: "@ffmpeg-installer/linux-arm@npm:4.1.3"
-  checksum: 2b5612696067bdc07a7582ec9b799aa2e41342f90c9de38163cc29cb7e253fab2046b8f74b1ce7800d195766abd894dc723696115e20d77750babb39af383661
-  languageName: node
-  linkType: hard
-
-"@ffmpeg-installer/linux-ia32@npm:4.1.0":
-  version: 4.1.0
-  resolution: "@ffmpeg-installer/linux-ia32@npm:4.1.0"
-  checksum: 9fb668942936297da9a85cd66fbf4ee0e7e6380c48fd419fcc4f07f9c1619d4806b9d45062abdd52b809ab73fab9a0fc46d289779b7a847e6ab0bf2e95ec7e36
-  languageName: node
-  linkType: hard
-
-"@ffmpeg-installer/linux-x64@npm:4.1.0":
-  version: 4.1.0
-  resolution: "@ffmpeg-installer/linux-x64@npm:4.1.0"
-  checksum: 6ffc6bd3ec36d87ecc7c7692af30b767a52bd742a9c93ba9dbddd765099056a889fdb4b9cd39ede178723bf68c103cbcc8a4ddc9e98e6b3e1a6d50f242d222f5
-  languageName: node
-  linkType: hard
-
-"@ffmpeg-installer/win32-ia32@npm:4.1.0":
-  version: 4.1.0
-  resolution: "@ffmpeg-installer/win32-ia32@npm:4.1.0"
-  checksum: 46e1140b4a675c90dc0e7bc8b4adc9aa20718d1b558c8289dc8f54e130555590799b179d15fdcb44f96bb01d54ff41fe6fc9d254e88510d0aac82fe1cdf52b4b
-  languageName: node
-  linkType: hard
-
-"@ffmpeg-installer/win32-x64@npm:4.1.0":
-  version: 4.1.0
-  resolution: "@ffmpeg-installer/win32-x64@npm:4.1.0"
-  checksum: df9ed94a716d1b372cc778e50734f25a682245e1cc2b9f693571bc56c19d89ac0a2361e2dbbe0548a92da03ba54565156ef75c3c09758a5123031c3e227f0386
-  languageName: node
-  linkType: hard
-
 "@types/node@npm:*, @types/node@npm:^16.10.2":
   version: 16.10.2
   resolution: "@types/node@npm:16.10.2"
@@ -227,6 +138,13 @@ __metadata:
   version: 0.0.901419
   resolution: "devtools-protocol@npm:0.0.901419"
   checksum: de68331ddfb35b828ad743d939d9237e122f76d4a6cbf1e64f6c6d8e9c2c5cc65a5f1994db0fead90192cca1aa9dbed2ea822a7da7b58104cd041a90e215b9a3
+  languageName: node
+  linkType: hard
+
+"dotenv@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "dotenv@npm:10.0.0"
+  checksum: f412c5fe8c24fbe313d302d2500e247ba8a1946492db405a4de4d30dd0eb186a88a43f13c958c5a7de303938949c4231c56994f97d05c4bc1f22478d631b4005
   languageName: node
   linkType: hard
 
@@ -571,9 +489,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "reclass@workspace:."
   dependencies:
-    "@ffmpeg-installer/ffmpeg": ^1.1.0
     "@types/node": ^16.10.2
     date-fns: ^2.24.0
+    dotenv: ^10.0.0
     puppeteer-core: ^10.4.0
     puppeteer-stream: ^2.0.6
     typescript: ^4.4.3
