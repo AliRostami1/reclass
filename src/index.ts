@@ -4,7 +4,6 @@ import { launch, getStream } from "puppeteer-stream";
 import { path as ffmpegPath } from "@ffmpeg-installer/ffmpeg";
 import { format } from "date-fns";
 import { createInterface } from "readline";
-import { createWriteStream } from "fs";
 import { spawn } from "child_process";
 
 const rl = createInterface({
@@ -20,8 +19,8 @@ interface Klass {
 }
 
 const exampleklass: Klass = {
-	name: "طراحی کامپیوتر سیستمهای دیجیتال",
-	time: "16:00",
+	name: "ریزپردازنده و زبان اسمبلی",
+	time: "10:00",
 	biweekly: false,
 };
 
@@ -185,7 +184,6 @@ async function main() {
 		"yyyy-MM-dd_kk-mm-ss"
 	)}`;
 	const plainVideoPath = `${basePath}${videoName}.mp4`;
-	const file = createWriteStream(plainVideoPath);
 	const stream = await getStream(page, { audio: true, video: true });
 	const ffmpeg = spawn(
 		ffmpegPath,
@@ -205,17 +203,13 @@ async function main() {
 			"mp3",
 			"-f",
 			"mp4",
-			// "-max_muxing_queue_size",
-			// "512",
-			"out.mp4",
+			plainVideoPath,
 			"-q:a",
 			"0",
 			"-map",
 			"a",
 			"-f",
 			"mp3",
-			// "-max_muxing_queue_size",
-			// "1024",
 			"-",
 		],
 		{ shell: true }
@@ -231,9 +225,16 @@ async function main() {
 		if (!stream.destroyed) {
 			await stream.destroy();
 			console.log("stopped recording");
-			file.close();
-			console.log("file saved!");
+			const ffmpegClosed = ffmpeg.kill("SIGINT");
+			if (ffmpegClosed) {
+				console.log("ffmpeg process exited successfully");
+			}
+			const ffplayClosed = ffplay.kill("SIGINT");
+			if (ffplayClosed) {
+				console.log("ffplay process exited successfully");
+			}
 			await browser.close();
+			process.exit(0);
 		}
 	};
 
