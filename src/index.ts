@@ -24,13 +24,16 @@ process.on("SIGINT", () => {
 async function main() {
   const browser = await openBrowser();
   const page = await getFirstTab(browser);
-  await minimizeBrowser(page);
+  // await minimizeBrowser(page);
 
   await login(browser, page);
 
   await enterTheClass(browser, page, exampleklass);
 
-  const stopRecording = await startRecordingAndPlayingSound(page, exampleklass);
+  const stopRecording = await startRecordingAndPlayingSound(
+    page,
+    exampleklass.name
+  );
 
   const exitProcedure = async () => {
     await stopRecording();

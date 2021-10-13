@@ -4,12 +4,22 @@
 # or a linux machine with no gui
 
 # Startup Xvfb
-Xvfb -ac :99 -screen 0 1280x1024x16 > /dev/null 2>&1 &
+Xvfb -ac :99 -screen 0 1280x1024x16 1> /dev/null 2>&1 &
 
 # Export some variables
 export DISPLAY=:99.0
-export GOOGLE_CHROME_PATH="`which google-chrome`"
-export FFMPEG_PATH="$`which ffmpeg`"
-export FFPLAY="`which ffplay`"
+
+# check if out directory exists
+if [ ! -d out ]; then 
+    mkdir out
+fi
+
+# check if we're running inside a docker container
+# if we are then set the envs
+if [ -f /.dockerenv ]; then
+    export GOOGLE_CHROME_PATH="`which google-chrome`"
+    export FFMPEG_PATH="$`which ffmpeg`"
+    export FFPLAY="`which ffplay`"
+fi
 
 yarn start

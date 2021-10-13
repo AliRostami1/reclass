@@ -9,6 +9,9 @@ type EnvironmentVariables =
   | "DAAN_USERNAME"
   | "DAAN_PASSWORD";
 
+console.log(getEnv("FFMPEG_PATH"));
+// console.log(getEnv("FFPLAY_PATH"));
+
 export function getEnv(env: EnvironmentVariables): string {
   const ENV = process.env[env];
   if (ENV && ENV !== "") {
