@@ -26,7 +26,7 @@ async function main() {
   }
   setTimeout(() => {
     stopRecording();
-  }, 100000);
+  }, 10000);
 }
 
 main();

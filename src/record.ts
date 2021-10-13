@@ -53,10 +53,6 @@ export async function startRecording(
     if (!stream.destroyed) {
       await stream.destroy();
       console.log("stopped recording");
-      const ffmpegClosed = ffmpeg.kill("SIGINT");
-      if (ffmpegClosed) {
-        console.log("ffmpeg process exited successfully");
-      }
     }
   };
 }
