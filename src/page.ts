@@ -18,7 +18,7 @@ export async function openBrowser() {
       width: 0,
       height: 0,
     },
-    args: ["--start-maximized"],
+    args: ["--start-maximized", "--no-sandbox"],
     executablePath: getEnv("GOOGLE_CHROME_PATH"),
   }) as unknown as Promise<Browser>;
 }

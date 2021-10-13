@@ -16,6 +16,11 @@ const exampleklass: Klass = {
   biweekly: false,
 };
 
+process.on("SIGINT", () => {
+  console.log("SIGNIT received");
+  process.exit(0);
+});
+
 async function main() {
   const browser = await openBrowser();
   const page = await getFirstTab(browser);
