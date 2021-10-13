@@ -1,0 +1,3 @@
+sudo docker build . -t daan
+sudo docker volume create daanvol
+sudo docker run --name recdaan -v daanvol:/app/out/ --env DAAN_USERNAME="11139802563" --env DAAN_PASSWORD="12AlI1234" daan

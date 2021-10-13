@@ -22,17 +22,13 @@ RUN apt-get update \
 WORKDIR /app
 
 COPY .yarn /app/.yarn
+
 COPY package.json yarn.lock .yarnrc .yarnrc.yml /app/
 
-RUN yarn
+RUN yarn && yarn cache clean
 
 COPY . /app
 
-# RUN adduser --disabled-password --gecos '' r \
-#   && adduser r sudo \
-#   && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-
-# Create non-root group and user
-ENV SERVICE_NAME="daan"
+VOLUME [ "/app/out" ]
 
 CMD ["./entrypoint.sh"]
