@@ -17,40 +17,36 @@ export function generateVideoName(klass: Klass) {
 
 export async function startRecordingAndPlayingSound(page: Page, klass: Klass) {
   const stream = await getStream(page as any, { audio: true, video: true });
-  const ffmpeg = spawn(
-    getEnv("FFMPEG_PATH"),
-    [
-      "-y",
-      "-i",
-      "-",
-      "-c:v",
-      "libx265",
-      "-crf",
-      "26",
-      "-r",
-      "24",
-      "-filter:v",
-      `"crop=in_w:in_h-155"`,
-      "-c:a",
-      "mp3",
-      "-f",
-      "mp4",
-      generateVideoName(klass),
-      "-q:a",
-      "0",
-      "-map",
-      "a",
-      "-f",
-      "mp3",
-      "-",
-    ],
-    { shell: true }
-  );
+  const ffmpeg = spawn(getEnv("FFMPEG_PATH"), [
+    "-y",
+    "-i",
+    "-",
+    "-c:v",
+    "libx265",
+    "-crf",
+    "26",
+    "-r",
+    "24",
+    "-filter:v",
+    "crop=in_w:in_h-155",
+    "-c:a",
+    "mp3",
+    "-f",
+    "mp4",
+    generateVideoName(klass),
+    "-q:a",
+    "0",
+    "-map",
+    "a",
+    "-f",
+    "mp3",
+    "-",
+  ]);
   console.log("started recording");
   const ffplay = spawn(getEnv("FFPLAY_PATH"), ["-"]);
+  stream.pipe(ffmpeg.stdin);
   ffmpeg.stderr.pipe(process.stdout);
   ffmpeg.stdout.pipe(ffplay.stdin);
-  stream.pipe(ffmpeg.stdin);
 
   return async () => {
     if (!stream.destroyed) {

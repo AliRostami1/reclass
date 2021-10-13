@@ -11,9 +11,9 @@ import {
 } from "./stop";
 
 const exampleklass: Klass = {
-  name: "انتقال داده ها",
-  time: "12:00",
-  biweekly: false,
+  name: "سیستم های عامل",
+  time: "18:00",
+  biweekly: true,
 };
 
 process.on("SIGINT", () => {
