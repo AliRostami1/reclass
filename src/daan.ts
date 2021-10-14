@@ -1,13 +1,23 @@
-import { Page, Browser } from "puppeteer-core";
+import {
+  Page,
+  Browser,
+  getQueryHandlerAndSelector,
+  ElementHandle,
+} from "puppeteer-core";
 import { isBrowserOpen } from "./page";
 import { getEnv } from "./env";
 import { delay } from "./util";
 
-export interface Klass {
-  [key: string]: string | boolean;
+export interface OldKlass {
   name: string;
   time: string;
   biweekly: boolean;
+}
+export interface Klass {
+  name: string;
+  time: string;
+  title: string;
+  button: Element | null;
 }
 
 export async function login(browser: Browser, page: Page) {
@@ -79,7 +89,7 @@ export async function isLoggedin(page: Page) {
 export async function enterTheClass(
   browser: Browser,
   page: Page,
-  klass: Klass
+  klass: OldKlass
 ) {
   while (await isBrowserOpen(browser)) {
     try {
@@ -90,7 +100,7 @@ export async function enterTheClass(
 
       await page.waitForSelector("div.examBox");
 
-      const klassBtnHandle = await page.evaluateHandle((klass: Klass) => {
+      const klassBtnHandle = await page.evaluateHandle((klass: OldKlass) => {
         const elements = document.querySelectorAll("div.examBox");
         if (elements.length === 0) {
           // there is no class
@@ -122,7 +132,7 @@ export async function enterTheClass(
             'button.btn.examBtn.resultBtn[type="submit"]'
           );
         }
-      }, klass);
+      }, klass as any);
 
       const klassBtn = klassBtnHandle.asElement();
 
@@ -154,4 +164,38 @@ export async function isInClass(page: Page) {
   const url = page.url();
   const res = url.match(/class(\d)+\.daan\.ir/);
   return !!res;
+}
+
+export async function listKlasses(browser: Browser, page: Page) {
+  while (await isBrowserOpen(browser)) {
+    try {
+      if (await isInClass(page)) {
+        break;
+      }
+      await page.goto("http://mashhad.daan.ir/session-list");
+
+      await page.waitForSelector("div.examBox");
+      return await page.$$eval("div.examBox", (els) => {
+        return els.map((el): Klass => {
+          return extractKlassInfo(el);
+        });
+      });
+    } catch (e) {
+      console.error(e);
+      console.log("trying again in a minute...");
+      await delay(1000 * 60);
+      continue;
+    }
+  }
+}
+
+export function extractKlassInfo(el: Element): Klass {
+  return {
+    title: el.children[0].children[2].textContent as string,
+    name: el.children[1].children[0].children[0].children[2]
+      .textContent as string,
+    time: el.children[1].children[1].children[1].children[2]
+      .textContent as string,
+    button: el.querySelector('button.btn.examBtn.resultBtn[type="submit"]'),
+  };
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { minimizeBrowser, openBrowser, getFirstTab } from "./page";
-import { enterTheClass, Klass, login } from "./daan";
+import { openBrowser, getFirstTab } from "./page";
+import { enterTheClass, OldKlass, login } from "./daan";
 import { startRecordingAndPlayingSound } from "./record";
 import {
   stopBasedOnClassEnding,
@@ -10,10 +10,10 @@ import {
   stopBasedOnTimeout,
 } from "./stop";
 
-const exampleklass: Klass = {
-  name: "سیستم های عامل",
-  time: "18:00",
-  biweekly: true,
+const exampleklass: OldKlass = {
+  name: "اصول رباتیکز",
+  time: "12:00",
+  biweekly: false,
 };
 
 process.on("SIGINT", () => {
