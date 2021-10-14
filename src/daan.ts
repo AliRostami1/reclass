@@ -1,9 +1,5 @@
-import {
-  Page,
-  Browser,
-  getQueryHandlerAndSelector,
-  ElementHandle,
-} from "puppeteer-core";
+import { parse } from "date-fns";
+import { Page, Browser } from "puppeteer-core";
 import { isBrowserOpen } from "./page";
 import { getEnv } from "./env";
 import { delay } from "./util";
@@ -166,27 +162,15 @@ export async function isInClass(page: Page) {
   return !!res;
 }
 
-export async function listKlasses(browser: Browser, page: Page) {
-  while (await isBrowserOpen(browser)) {
-    try {
-      if (await isInClass(page)) {
-        break;
-      }
-      await page.goto("http://mashhad.daan.ir/session-list");
+export async function listKlasses(page: Page) {
+  await page.goto("http://mashhad.daan.ir/session-list");
 
-      await page.waitForSelector("div.examBox");
-      return await page.$$eval("div.examBox", (els) => {
-        return els.map((el): Klass => {
-          return extractKlassInfo(el);
-        });
-      });
-    } catch (e) {
-      console.error(e);
-      console.log("trying again in a minute...");
-      await delay(1000 * 60);
-      continue;
-    }
-  }
+  await page.waitForSelector("div.examBox");
+  return await page.$$eval("div.examBox", (els) => {
+    return els.map((el): Klass => {
+      return extractKlassInfo(el);
+    });
+  });
 }
 
 export function extractKlassInfo(el: Element): Klass {
