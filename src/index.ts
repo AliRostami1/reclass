@@ -12,8 +12,8 @@ import {
 
 const exampleklass: OldKlass = {
   name: "اصول رباتیکز",
-  time: "12:00",
-  biweekly: false,
+  time: "14:00",
+  biweekly: true,
 };
 
 process.on("SIGINT", () => {

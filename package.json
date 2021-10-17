@@ -10,7 +10,8 @@
   "packageManager": "yarn@3.0.2",
   "scripts": {
     "start": "tsc && node dist/index.js",
-    "exp": "tsc && node dist/test.js"
+    "exp": "tsc && node dist/test.js",
+    "auto": "tsc && node dist/auto.js"
   },
   "devDependencies": {
     "@types/node": "^16.10.2",

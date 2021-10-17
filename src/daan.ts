@@ -1,8 +1,7 @@
-import { parse } from "date-fns";
 import { Page, Browser } from "puppeteer-core";
 import { isBrowserOpen } from "./page";
 import { getEnv } from "./env";
-import { delay } from "./util";
+import { delay, hhmmToDate, biweeklyToNormal } from "./util";
 
 export interface OldKlass {
   name: string;
@@ -11,9 +10,9 @@ export interface OldKlass {
 }
 export interface Klass {
   name: string;
-  time: string;
+  time: Date;
   title: string;
-  button: Element | null;
+  enterable: boolean;
 }
 
 export async function login(browser: Browser, page: Page) {
@@ -82,71 +81,26 @@ export async function isLoggedin(page: Page) {
   }
 }
 
-export async function enterTheClass(
-  browser: Browser,
-  page: Page,
-  klass: OldKlass
-) {
+export async function enterTheClass(browser: Browser, klass: Klass) {
   while (await isBrowserOpen(browser)) {
     try {
-      if (await isInClass(page)) {
-        break;
-      }
+      const page = await browser.newPage();
       await page.goto("http://mashhad.daan.ir/session-list");
-
       await page.waitForSelector("div.examBox");
-
-      const klassBtnHandle = await page.evaluateHandle((klass: OldKlass) => {
-        const elements = document.querySelectorAll("div.examBox");
-        if (elements.length === 0) {
-          // there is no class
-          return;
-        }
-
-        let thisIsIt = -1;
-
-        elements.forEach((el, index) => {
-          const title = el.children[0].children[2].textContent;
-          const name =
-            el.children[1].children[0].children[0].children[2].textContent;
-          const time =
-            el.children[1].children[1].children[1].children[2].textContent;
-          if (name === klass.name) {
-            if (klass.biweekly) {
-              if (title !== name) {
-                thisIsIt = index;
-              }
-            } else {
-              if (time === klass.time) {
-                thisIsIt = index;
-              }
-            }
-          }
+      const button = await page.evaluateHandle("div.examBox", (els) => {
+        return els.map((el) => {
+          return {
+            title: el.children[0].children[2].textContent as string,
+            name: el.children[1].children[0].children[0].children[2]
+              .textContent as string,
+            time: el.children[1].children[1].children[1].children[2]
+              .textContent as string,
+            enterable: !!el.querySelector(
+              'button.btn.examBtn.resultBtn[type="submit"]'
+            ),
+          };
         });
-        if (thisIsIt !== -1) {
-          return elements[thisIsIt].querySelector(
-            'button.btn.examBtn.resultBtn[type="submit"]'
-          );
-        }
-      }, klass as any);
-
-      const klassBtn = klassBtnHandle.asElement();
-
-      if (klassBtn) {
-        await Promise.all([
-          klassBtn.click(),
-          page.waitForNavigation({ waitUntil: "networkidle2" }),
-        ]);
-      } else {
-        throw "klassBtn not found";
-      }
-
-      if (await isInClass(page)) {
-        console.log("enterd class");
-        break;
-      } else {
-        throw "failed entering the class";
-      }
+      });
     } catch (e) {
       console.error(e);
       console.log("trying again in a minute...");
@@ -166,20 +120,25 @@ export async function listKlasses(page: Page) {
   await page.goto("http://mashhad.daan.ir/session-list");
 
   await page.waitForSelector("div.examBox");
-  return await page.$$eval("div.examBox", (els) => {
-    return els.map((el): Klass => {
-      return extractKlassInfo(el);
+
+  const data = await page.$$eval("div.examBox", (els) => {
+    return els.map((el) => {
+      return {
+        title: el.children[0].children[2].textContent as string,
+        name: el.children[1].children[0].children[0].children[2]
+          .textContent as string,
+        time: el.children[1].children[1].children[1].children[2]
+          .textContent as string,
+        enterable: !!el.querySelector(
+          'button.btn.examBtn.resultBtn[type="submit"]'
+        ),
+      };
     });
   });
-}
-
-export function extractKlassInfo(el: Element): Klass {
-  return {
-    title: el.children[0].children[2].textContent as string,
-    name: el.children[1].children[0].children[0].children[2]
-      .textContent as string,
-    time: el.children[1].children[1].children[1].children[2]
-      .textContent as string,
-    button: el.querySelector('button.btn.examBtn.resultBtn[type="submit"]'),
-  };
+  return data.map((el): Klass => {
+    return {
+      ...el,
+      time: hhmmToDate(biweeklyToNormal(el.time)),
+    };
+  });
 }

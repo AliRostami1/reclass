@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { openBrowser, getFirstTab } from "./page";
-import { enterTheClass, OldKlass, login } from "./daan";
+import { enterTheClass, listKlasses, login } from "./daan";
 import { startRecordingAndPlayingSound } from "./record";
 import {
   stopBasedOnClassEnding,
@@ -22,20 +22,24 @@ async function main() {
 
   await login(browser, page);
 
-  await enterTheClass(browser, page, exampleklass);
+  const listOfKlasses = await listKlasses(page);
 
-  const stopRecording = await startRecordingAndPlayingSound(page, "");
+  console.log(listOfKlasses);
 
-  const exitProcedure = async () => {
-    await stopRecording();
-    await browser.close();
-    console.log("closed the browser");
-  };
+  // await enterTheClass(browser, page, exampleklass);
 
-  stopBasedOnStdin(exitProcedure);
-  stopBasedOnTimeout(exitProcedure);
-  stopBasedOnClassEnding(browser, page, exitProcedure);
-  stopBasedOnNumberOfParticipants(browser, page, exitProcedure);
+  // const stopRecording = await startRecordingAndPlayingSound(page, "");
+
+  // const exitProcedure = async () => {
+  //   await stopRecording();
+  //   await browser.close();
+  //   console.log("closed the browser");
+  // };
+
+  // stopBasedOnStdin(exitProcedure);
+  // stopBasedOnTimeout(exitProcedure);
+  // stopBasedOnClassEnding(browser, page, exitProcedure);
+  // stopBasedOnNumberOfParticipants(browser, page, exitProcedure);
 }
 
 main();
